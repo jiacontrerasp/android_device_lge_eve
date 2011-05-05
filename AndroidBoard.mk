@@ -94,6 +94,8 @@ LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
 
 PRODUCT_COPY_FILES += \
+	frameworks/base/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
+	frameworks/base/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
 	frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
 	frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
 	frameworks/base/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
@@ -110,6 +112,8 @@ PRODUCT_COPY_FILES += \
 	device/lg/eve/prebuilt/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
 	device/lg/eve/prebuilt/gps.conf:system/etc/gps.conf
 
+PRODUCT_COPY_FILES += \
+	device/lg/eve/spn-conf.xml:system/etc/spn-conf.xml
 #Radio
 PROPRIETARY := lib/liblgdrmwbxml.so lib/liblgdrmxyssl.so lib/libdll.so \
 	lib/libril-qcril-hook-oem.so lib/libgsdi_exp.so lib/libgstk_exp.so lib/libwms.so \
