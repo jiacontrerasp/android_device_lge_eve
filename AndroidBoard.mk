@@ -20,6 +20,9 @@ $(file) : $(LOCAL_PATH)/prebuilt/ueventd.eve.rc | $(ACP)
 	$(transform-prebuilt-to-target)
 ALL_PREBUILT += $(file)
 
+$(call add-radio-file,recovery/images/firmware_install.565)
+$(call add-radio-file,recovery/images/firmware_error.565)
+$(call add-radio-file,recovery/images/bitmap_size.txt)
 
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := eve_qwerty.kcm

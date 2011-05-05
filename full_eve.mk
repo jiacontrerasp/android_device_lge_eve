@@ -18,13 +18,20 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 
 DEVICE_PACKAGE_OVERLAYS := device/lg/eve/overlay
 
+# Packages
 PRODUCT_PACKAGES += \
     VoiceDialer \
-    FM \
     LiveWallpapersPicker \
     sensors.eve \
-	lights.eve \
-	Torch
+    lights.eve \
+    gps.eve \
+    rzscontrol \
+    copybit.msm7k \
+    gralloc.msm7k
+
+# not work
+#    libOmxCore \
+#    libmm-omxcore
 
 # Install the features available on this device.
 PRODUCT_COPY_FILES += \
@@ -40,7 +47,7 @@ PRODUCT_PROPERTY_OVERRIDES := \
     ro.ril.hsxpa=1 \
     ro.ril.gprsclass=10 \
     ro.media.dec.jpeg.memcap=10000000 \
-	ro.setupwizard.enable_bypass=1
+    ro.setupwizard.enable_bypass=1
 
 PRODUCT_PROPERTY_OVERRIDES += \
     rild.libpath=/system/lib/libril-qc-1.so \
@@ -69,11 +76,14 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # The OpenGL ES API level that is natively supported by this device.
 # This is a 16.16 fixed point number
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.opengles.version=65536
+    ro.opengles.version=65537
 
 # media configuration xml file
 PRODUCT_COPY_FILES += \
     device/lg/eve/media_profiles.xml:/system/etc/media_profiles.xml
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_KERNEL):kernel
 
 # stuff common to all HTC phones
 #$(call inherit-product, device/htc/common/common.mk)
@@ -83,4 +93,4 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/generic.mk)
 # Discard inherited values and use our own instead.
 PRODUCT_NAME := full_eve
 PRODUCT_DEVICE := eve
-PRODUCT_MODEL := Full Android on LG GW620
+PRODUCT_MODEL := Full Android on LG GW620/KH5200

@@ -11,7 +11,7 @@ FILES="$FILES lib/libdiag.so lib/libril-qc-1.so lib/libril.so"
 FILES="$FILES lib/libdss.so lib/libqmi.so bin/qmuxd"
 
 #Wifi
-FILES="$FILES etc/wl/rtecdc.bin etc/wl/nvram.txt"
+FILES="$FILES etc/wl/rtecdc.bin etc/wl/rtecdc-apsta.bin etc/wl/nvram.txt"
 
 #Bluetooth
 FILES="$FILES bin/BCM4325D0_004.001.007.0168.0169.hcd bin/btld"
@@ -24,6 +24,10 @@ FILES="$FILES lib/libmm-adspsvc.so lib/libOmxH264Dec.so lib/libOmxMpeg4Dec.so li
 FILES="$FILES lib/libomx_aacdec_sharedlibrary.so lib/libomx_amrdec_sharedlibrary.so lib/libomx_amrenc_sharedlibrary.so lib/libomx_avcdec_sharedlibrary.so"
 FILES="$FILES lib/libomx_m4vdec_sharedlibrary.so lib/libomx_mp3dec_sharedlibrary.so"
 FILES="$FILES lib/libaomx_mp3dec_sharedlibrary.so lib/libaomx_mp4dec_sharedlibrary.so lib/libaomx_wmadec_sharedlibrary.so lib/libaomx_wmvdec_sharedlibrary.so"
+# qcomm Video encode/decode
+FILES="$FILES lib/libOmxCore.so lib/libmm-omxcore.so lib/libqcomm_omx.so"
+# Camera
+FILES="$FILES lib/libmmipl.so"
 
 #Sensors
 FILES="$FILES bin/akmd2"
