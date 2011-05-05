@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "Sensors"
+//#define LOG_NDEBUG 0
 
 #include <hardware/sensors.h>
 #include <fcntl.h>
@@ -60,7 +61,7 @@
 #define EVENT_TYPE_MAGV_Z           ABS_BRAKE
 #endif
 
-#define EVENT_TYPE_PROXIMITY		ABS_DISTANCE
+#define EVENT_TYPE_PROXIMITY        ABS_DISTANCE
 
 #define EVENT_TYPE_TEMPERATURE      ABS_THROTTLE
 #define EVENT_TYPE_STEP_COUNT       ABS_GAS
@@ -103,22 +104,30 @@
 #define SENSORS_ACCELERATION       0x02
 #define SENSORS_TEMPERATURE        0x04
 #define SENSORS_MAGNETIC_FIELD     0x08
-#define SENSORS_LIGHT			   0x10
-#define SENSORS_PROXIMITY		   0x20
+#define SENSORS_LIGHT              0x10
+#define SENSORS_PROXIMITY          0x20
 #define SENSORS_ORIENTATION_RAW_HANDLE    7
 #define SENSORS_ORIENTATION_HANDLE        0
 #define SENSORS_ACCELERATION_HANDLE       1
 #define SENSORS_TEMPERATURE_HANDLE        2
 #define SENSORS_MAGNETIC_FIELD_HANDLE     3
-#define SENSORS_LIGHT_HANDLE			  4
+#define SENSORS_LIGHT_HANDLE              4
 #define SENSORS_PROXIMITY_HANDLE     	  5
 
 #define SUPPORTED_SENSORS (SENSORS_ORIENTATION | \
               SENSORS_ACCELERATION | \
               SENSORS_MAGNETIC_FIELD | \
               SENSORS_PROXIMITY | \
-			  SENSORS_LIGHT | \
+              SENSORS_LIGHT | \
               SENSORS_ORIENTATION_RAW)
+
+struct sensors_control_context_t {
+    struct sensors_control_device_t device;
+};
+
+struct sensors_data_context_t {
+    struct sensors_data_device_t device;
+};
 
 /*****************************************************************************/
 
@@ -307,7 +316,7 @@ static int open_input()
 
 static int open_akm()
 {
-	LOGD("open_akm");
+    LOGD("open_akm");
 
     if (sAkmFD <= 0) {
         sAkmFD = open(AKM_DEVICE_NAME, O_RDONLY);
@@ -323,7 +332,7 @@ static int open_akm()
 
 static void close_akm()
 {
-	LOGD("close_akm");
+    LOGD("close_akm");
 
     if (sAkmFD > 0) {
         LOGE("%s, fd=%d", __PRETTY_FUNCTION__, sAkmFD);
@@ -362,11 +371,11 @@ static void enable_disable(int fd, uint32_t sensors, uint32_t mask)
             LOGE("ECS_IOCTL_APP_SET_TFLAG error (%s)", strerror(errno));
         }
     }
-#if 1 /*def ECS_IOCTL_APP_SET_MVFLAG	*/
-	if (mask & SENSORS_PROXIMITY) {
+#ifdef ECS_IOCTL_APP_SET_PFLAG
+    if (mask & SENSORS_PROXIMITY) {
         flags = (sensors & SENSORS_PROXIMITY) ? 1 : 0;
         if (ioctl(fd, ECS_IOCTL_APP_SET_PFLAG, &flags) < 0) {
-            LOGE("ECS_IOCTL_APP_SET_TFLAG error (%s)", strerror(errno));
+            LOGE("ECS_IOCTL_APP_SET_PFLAG error (%s)", strerror(errno));
         }
     }
 #endif	
@@ -385,7 +394,7 @@ static uint32_t read_sensors_state(int fd)
     if (fd<0) return 0;
     short flags;
     uint32_t sensors = 0;
-	LOGE("read_sensors_state");
+    LOGE("read_sensors_state");
     // read the actual value of all sensors
     if (!ioctl(fd, ECS_IOCTL_APP_GET_MFLAG, &flags)) {
         if (flags)  sensors |= SENSORS_ORIENTATION;
@@ -399,7 +408,7 @@ static uint32_t read_sensors_state(int fd)
         if (flags)  sensors |= SENSORS_TEMPERATURE;
         else        sensors &= ~SENSORS_TEMPERATURE;
     }
-	if (!ioctl(fd, ECS_IOCTL_APP_GET_PFLAG, &flags)) {
+    if (!ioctl(fd, ECS_IOCTL_APP_GET_PFLAG, &flags)) {
         if (flags)  sensors |= SENSORS_PROXIMITY;
         else        sensors &= ~SENSORS_PROXIMITY;
     }
@@ -410,7 +419,7 @@ static uint32_t read_sensors_state(int fd)
     }
 #endif
 
-	sensors |= SENSORS_LIGHT;
+    sensors |= SENSORS_LIGHT;
 
     return sensors;
 }
@@ -419,7 +428,7 @@ static uint32_t read_sensors_state(int fd)
 
 static native_handle_t* sensors_control_open_data_source(struct sensors_control_device_t *dev)
 {
-	LOGI("sensors_control_open_data_source");
+    LOGI("sensors_control_open_data_source");
 
     native_handle * nh = native_handle_create(1, 0);
     nh->data[0] = open_input();
@@ -436,7 +445,7 @@ static int sensors_control_activate(struct sensors_control_device_t *dev,
 
     LOGD("%s active=%08x sensor=%08x new_sensors=%x changed=%x", __FUNCTION__,
         active, sensor, new_sensors, changed);
-	LOGD("sensors_control_activate");
+    LOGI("sensors_control_activate");
 
     if (changed) {
         int fd = open_akm();
@@ -463,7 +472,7 @@ static int sensors_control_activate(struct sensors_control_device_t *dev,
 
 static int sensors_control_delay(struct sensors_control_device_t *dev, int32_t ms)
 {
-	LOGD("sensors_control_delay");
+    LOGI("sensors_control_delay");
 
 #ifdef ECS_IOCTL_APP_SET_DELAY
     if (sAkmFD <= 0) {
@@ -500,7 +509,7 @@ const struct sensors_module_t HAL_MODULE_INFO_SYM = {
 };
 
 struct sensor_t sensors_descs[] = {
-	{
+    {
       name : "AK8973 Magnetic Field",
       vendor : "Asahi Kasei Corp.",
       version : 1,
@@ -508,7 +517,7 @@ struct sensor_t sensors_descs[] = {
       type : SENSOR_TYPE_MAGNETIC_FIELD,
       maxRange : 1.0,
       resolution : 1,
-      power : 20,
+      power : 6.8f,
     },
     {
       name : "AK8973 Compass",
@@ -518,7 +527,7 @@ struct sensor_t sensors_descs[] = {
       type : SENSOR_TYPE_ORIENTATION,
       maxRange : 1.0,
       resolution : 1,
-      power : 20,
+      power : 7.0f,
     },
     {
       name : "AK8973 Compass Raw",
@@ -528,10 +537,10 @@ struct sensor_t sensors_descs[] = {
       type : SENSOR_TYPE_ORIENTATION,
       maxRange : 1.0,
       resolution : 1,
-      power : 20,
+      power : 7.0f,
     },
     {
-      name : "BMA150",
+      name : "BMA150 Accelerometer",
       vendor : "bma150",
       version : 1,
       handle : SENSORS_ACCELERATION_HANDLE,
@@ -540,16 +549,16 @@ struct sensor_t sensors_descs[] = {
       resolution : 1,
       power : 20,
     },
-     {
-	name : "GP2AP002",
+    {
+	name : "GP2AP002 Proximity",
 	vendor : "gp2ap002",
 	version : 1,
 	handle : SENSORS_PROXIMITY_HANDLE,
 	type : SENSOR_TYPE_PROXIMITY,
 	maxRange : 1.0,
 	resolution : 1,
-	power : 20,
-  },
+	power : 0.5f,
+    },
     {
       name : "AK8973 Temperature",
       vendor : "Asahi Kasei Corp.",
@@ -558,9 +567,9 @@ struct sensor_t sensors_descs[] = {
       type : SENSOR_TYPE_TEMPERATURE,
       maxRange : 1.0,
       resolution : 1,
-      power : 20,
+      power : 0.5f,
     },
-	{
+    {
       name : "Brightness",
       vendor : "-",
       version : 1,
@@ -568,20 +577,11 @@ struct sensor_t sensors_descs[] = {
       type : SENSOR_TYPE_LIGHT,
       maxRange : 15.0,
       resolution : 1,
-      power : 20,
+      power : 0.5f,
     },
-    0,
 };
 
 /*****************************************************************************/
-struct sensors_control_context_t {
-    struct sensors_control_device_t device;
-};
-
-struct sensors_data_context_t {
-    struct sensors_data_device_t device;
-};
-
 static int sensors_get_sensors_list(struct sensors_module_t* module,
 		struct sensor_t const** plist){
     *plist = sensors_descs;
@@ -640,7 +640,7 @@ static int sensors_device_open(const struct hw_module_t* module, const char* nam
 static int sensors_control_device_close(struct hw_device_t *dev)
 {
     struct sensors_control_context_t* ctx = (struct sensors_control_device_t*)dev;
-	LOGD("sensors_control_device_close");
+    LOGD("sensors_control_device_close");
     free(ctx);
     return 0;
 }
@@ -648,14 +648,14 @@ static int sensors_control_device_close(struct hw_device_t *dev)
 static int sensors_data_device_close(struct hw_device_t *dev)
 {
     struct sensors_data_context_t* ctx = (struct sensors_data_device_t*)dev;
-	LOGD("sensors_data_device_close");
+    LOGD("sensors_data_device_close");
     free(ctx);
     return 0;
 }
 
 static int sensors_control_wake(struct sensors_control_device_t *dev)
 {
-	LOGD("sensors_control_wake");
+    LOGD("sensors_control_wake");
 
     return 0;
 }
@@ -663,14 +663,37 @@ static int sensors_control_wake(struct sensors_control_device_t *dev)
 /*****************************************************************************/
 
 #define MAX_NUM_SENSORS 8
+
 static int sInputFD = -1;
+#if 0
 static const int ID_O  = 0;
 static const int ID_A  = 1;
 static const int ID_T  = 2;
 static const int ID_M  = 3;
-static const int ID_L = 4;
+static const int ID_L  = 4;
 static const int ID_P  = 5;
 static const int ID_OR = 7; // orientation raw
+#else
+#define ID_O   (0)
+#define ID_A   (1)
+#define ID_T   (2)
+#define ID_M   (3)
+#define ID_L   (4)
+#define ID_P   (5)
+#define ID_OR  (7)
+#endif
+
+static int id_to_sensor[MAX_NUM_SENSORS] = {
+    [ID_O] = SENSOR_TYPE_ORIENTATION,
+    [ID_A] = SENSOR_TYPE_ACCELEROMETER,
+    [ID_T] = SENSOR_TYPE_TEMPERATURE,
+    [ID_M] = SENSOR_TYPE_MAGNETIC_FIELD,
+    [ID_L] = SENSOR_TYPE_LIGHT,
+    [ID_P] = SENSOR_TYPE_PROXIMITY,
+    [ID_OR] = SENSOR_TYPE_PROXIMITY,
+};
+
+
 static sensors_data_t sSensors[MAX_NUM_SENSORS];
 static uint32_t sPendingSensors;
 
@@ -680,7 +703,7 @@ static int sensors_data_data_open(struct sensors_data_device_t *dev, native_hand
     int i;
     LMSInit();
     memset(&sSensors, 0, sizeof(sSensors));
-	LOGD("sensors_data_data_open");
+    LOGD("sensors_data_data_open");
     for (i=0 ; i<MAX_NUM_SENSORS ; i++) {
         // by default all sensors have high accuracy
         // (we do this because we don't get an update if the value doesn't
@@ -702,23 +725,25 @@ static int sensors_data_data_close(struct sensors_data_device_t *dev)
 
 static int pick_sensor(sensors_data_t* values)
 {
-	int i;
-	for(i = 0; i < MAX_NUM_SENSORS; ++i) {
+    int i;
+    for(i = 0; i < MAX_NUM_SENSORS; ++i) {
         if (sPendingSensors & (1<<i)) {
             sPendingSensors &= ~(1<<i);
             *values = sSensors[i];
-            values->sensor = (1<<i);
-            /*LOGD_IF(0, "%d [%f, %f, %f]", (1<<i),
+            //values->sensor = (1<<i);
+            values->sensor = id_to_sensor[i];
+            LOGD_IF(0, "%d [%f, %f, %f]",
+                    values->sensor,
                     values->vector.x,
                     values->vector.y,
-                    values->vector.z);*/
+                    values->vector.z);
             return SENSORS_HANDLE_BASE + i;
         }
     }
     LOGD("No sensor to return!!! sPendingSensors=%08x", sPendingSensors);
     // we may end-up in a busy loop, slow things down, just in case.
     usleep(100000);
-    return 0;
+    return -1;
 }
 
 static int sensors_data_poll(struct sensors_data_device_t *dev, sensors_data_t* data)
@@ -733,7 +758,7 @@ static int sensors_data_poll(struct sensors_data_device_t *dev, sensors_data_t* 
 
     // there are pending sensors, returns them now...
     if (sPendingSensors) {
-      LOGD("sPending");
+        LOGD("sPending");
         return pick_sensor(data);
     }
 
@@ -780,46 +805,46 @@ static int sensors_data_poll(struct sensors_data_device_t *dev, sensors_data_t* 
         if (nread == sizeof(event)) {
             uint32_t v;
             if (event.type == EV_ABS) {
-	      LOGD("type: %d code: %d value: %-5d time: %ds",
+                LOGD("type: %d code: %d value: %-5d time: %ds",
 	              event.type, event.code, event.value,
 	            (int)event.time.tv_sec);
                 switch (event.code) {
 
                     case EVENT_TYPE_ACCEL_X:
                         new_sensors |= SENSORS_ACCELERATION;
-						LOGD("EVENT_TYPE_ACCEL_X");
+                        LOGD("EVENT_TYPE_ACCEL_X");
                         sSensors[ID_A].acceleration.x = event.value * CONVERT_A_X;
                         break;
                     case EVENT_TYPE_ACCEL_Y:
                         new_sensors |= SENSORS_ACCELERATION;
-						LOGD("EVENT_TYPE_ACCEL_Y");
+                        LOGD("EVENT_TYPE_ACCEL_Y");
                         sSensors[ID_A].acceleration.y = event.value * CONVERT_A_Y;
                         break;
                     case EVENT_TYPE_ACCEL_Z:
                         new_sensors |= SENSORS_ACCELERATION;
-						LOGD("EVENT_TYPE_ACCEL_Z");
+                        LOGD("EVENT_TYPE_ACCEL_Z");
                         sSensors[ID_A].acceleration.z = event.value * CONVERT_A_Z;
                         break;
 
                     case EVENT_TYPE_MAGV_X:
                         new_sensors |= SENSORS_MAGNETIC_FIELD;
-						LOGD("EVENT_TYPE_MAGV_X");
+                        LOGD("EVENT_TYPE_MAGV_X");
                         sSensors[ID_M].magnetic.x = event.value * CONVERT_M_X;
                         break;
                     case EVENT_TYPE_MAGV_Y:
                         new_sensors |= SENSORS_MAGNETIC_FIELD;
-						LOGD("EVENT_TYPE_MAGV_Y");
+                        LOGD("EVENT_TYPE_MAGV_Y");
                         sSensors[ID_M].magnetic.y = event.value * CONVERT_M_Y;
                         break;
                     case EVENT_TYPE_MAGV_Z:
                         new_sensors |= SENSORS_MAGNETIC_FIELD;
-						LOGD("EVENT_TYPE_MAGV_Z");
+                        LOGD("EVENT_TYPE_MAGV_Z");
                         sSensors[ID_M].magnetic.z = event.value * CONVERT_M_Z;
                         break;
 
                     case EVENT_TYPE_YAW:
                         new_sensors |= SENSORS_ORIENTATION | SENSORS_ORIENTATION_RAW;
-						LOGD("EVENT_TYPE_YAW");
+                        LOGD("EVENT_TYPE_YAW");
                         /*t = event.time.tv_sec*1000000000LL +
                                 event.time.tv_usec*1000;
                         sSensors[ID_O].orientation.azimuth = 
@@ -830,46 +855,46 @@ static int sensors_data_poll(struct sensors_data_device_t *dev, sensors_data_t* 
                         break;
                     case EVENT_TYPE_PITCH:
                         new_sensors |= SENSORS_ORIENTATION | SENSORS_ORIENTATION_RAW;
-						LOGD("EVENT_TYPE_PITCH");
+                        LOGD("EVENT_TYPE_PITCH");
                         sSensors[ID_O].orientation.pitch = event.value * CONVERT_O_P;
                         sSensors[ID_OR].orientation.pitch = event.value;
                         break;
                     case EVENT_TYPE_ROLL:
                         new_sensors |= SENSORS_ORIENTATION | SENSORS_ORIENTATION_RAW;
-						LOGD("EVENT_TYPE_ROLL");
+                        LOGD("EVENT_TYPE_ROLL");
                         sSensors[ID_O].orientation.roll = event.value * CONVERT_O_R;
                         sSensors[ID_OR].orientation.roll = event.value;
                         break;
 
                     case EVENT_TYPE_TEMPERATURE:
                         new_sensors |= SENSORS_TEMPERATURE;
-						LOGD("EVENT_TYPE_TEMPERATURE");
+                        LOGD("EVENT_TYPE_TEMPERATURE");
                         sSensors[ID_T].temperature = event.value;
                         break;
-					case EVENT_TYPE_PROXIMITY:
-						new_sensors |= SENSORS_PROXIMITY;
-						LOGD("EVENT_TYPE_PROXIMITY");
-						sSensors[ID_P].distance = event.value;
-						break;
-					case EVENT_TYPE_LIGHT:
-						LOGD("EVENT_TYPE_LIGHT %d", event.value);
-						new_sensors |= SENSORS_LIGHT;
-						sSensors[ID_L].light = event.value;
-						break;
-	                case EVENT_TYPE_STEP_COUNT:
-						LOGD("EVENT_TYPE_STEP_COUNT");
+                    case EVENT_TYPE_PROXIMITY:
+                        new_sensors |= SENSORS_PROXIMITY;
+                        LOGD("EVENT_TYPE_PROXIMITY");
+                        sSensors[ID_P].distance = event.value;
+                        break;
+                    case EVENT_TYPE_LIGHT:
+                        LOGD("EVENT_TYPE_LIGHT %d", event.value);
+                        new_sensors |= SENSORS_LIGHT;
+                        sSensors[ID_L].light = event.value;
+                        break;
+                    case EVENT_TYPE_STEP_COUNT:
+                        LOGD("EVENT_TYPE_STEP_COUNT");
                         // step count (only reported in MODE_FFD)
                         // we do nothing with it for now.
                         break;
                     case EVENT_TYPE_ACCEL_STATUS:
-						LOGD("EVENT_TYPE_ACCEL_STATUS");
+                        LOGD("EVENT_TYPE_ACCEL_STATUS");
                         // accuracy of the calibration (never returned!)
                         //LOGD("G-Sensor status %d", event.value);
                         break;
                     case EVENT_TYPE_ORIENT_STATUS:
                         // accuracy of the calibration
                         v = (uint32_t)(event.value & SENSOR_STATE_MASK);
-						LOGD("EVENT_TYPE_ORIENT_STATUS");
+                        LOGD("EVENT_TYPE_ORIENT_STATUS");
                         LOGE_IF(sSensors[ID_O].orientation.status != (uint8_t)v,
                                 "M-Sensor status %d", v);
                         sSensors[ID_O].orientation.status = (uint8_t)v;
@@ -879,7 +904,7 @@ static int sensors_data_poll(struct sensors_data_device_t *dev, sensors_data_t* 
             } else if (event.type == EV_SYN) {
                 if (new_sensors) {
                     sPendingSensors = new_sensors;
-					LOGD("sPendingSensors");
+                    LOGD("sPendingSensors");
                     int64_t t = event.time.tv_sec*1000000000LL +
                             event.time.tv_usec*1000;
                     while (new_sensors) {
