@@ -40,6 +40,9 @@ public:
         Accelerometer   = 0,
         MagneticField   = 1,
         Orientation     = 2,
+        Temperature     = 3,
+        Proximity       = 4,
+        Brightness      = 5,
         numSensors
     };
 
