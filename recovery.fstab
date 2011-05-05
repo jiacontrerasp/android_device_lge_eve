@@ -1,0 +1,16 @@
+# mount point	fstype		device			[device2]
+
+/boot		mtd		boot
+/cache		yaffs2		cache
+/data		yaffs2		userdata
+/lgdrm		yaffs2		lgdrm
+/sdcard		vfat		/dev/block/mmcblk0p1	/dev/block/mmcblk0
+/system		yaffs2		system
+
+#mtd0: 00080000 00020000 "usd"
+#mtd1: 00580000 00020000 "pkg"
+#mtd2: 006e0000 00020000 "boot"
+#mtd3: 0c800000 00020000 "system"
+#mtd4: 0bc40000 00020000 "userdata"
+#mtd5: 002c0000 00020000 "lgdrm"
+#mtd6: 04000000 00020000 "cache"
