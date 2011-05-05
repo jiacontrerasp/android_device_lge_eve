@@ -1,0 +1,68 @@
+[type=QWERTY]
+#ä: 0x00C4
+#ü: 0x00FC
+#ö: 0x00D6
+#Also consider that the by the different layouts QWERTY,QWERTZ,AZERTY we also have
+#special characters on keys which are unused by the other layouts.
+# keycode       display number  base    caps    fn      caps_fn
+
+Q               'A'     '2'     'a'     'A'     0x9     0x00C4
+B               'B'     '2'     'b'     'B'     ','     ','
+C               'C'     '2'     'c'     'C'     '"'     '"'
+D               'D'     '3'     'd'     'D'     '\'     0x00
+E               'E'     '3'     'e'     'E'     0x20AC  0x0301
+F               'F'     '3'     'f'     'F'     '['     '['
+G               'G'     '4'     'g'     'G'     ']'     ']'
+H               'H'     '4'     'h'     'H'     '<'     '<'
+I               'I'     '4'     'i'     'I'     '='     '='
+J               'J'     '5'     'j'     'J'     '>'     '>'
+K               'K'     '5'     'k'     'K'     '{'     '{'
+L               'L'     '5'     'l'     'L'     '}'     '}'
+M               'M'     '6'     'm'     'M'     '"'     0x00
+N               'N'     '6'     'n'     'N'     ';'     0x0303
+O               'O'     '6'     'o'     'O'     ':'     ':'
+P               'P'     '7'     'p'     'P'     ';'     ';'
+A               'Q'     '7'     'q'     'Q'     0x9     0x0300
+R               'R'     '7'     'r'     'R'     '~'     '~'
+S               'S'     '7'     's'     'S'     0x00DF  'S'
+T               'T'     '8'     't'     'T'     '_'     '_'
+U               'U'     '8'     'u'     'U'     '+'     '+'
+V               'V'     '8'     'v'     'V'     '/'     '/'
+Z               'W'     '9'     'w'     'W'     '`'     0x00
+X               'X'     '9'     'x'     'X'     '''     '''
+Y               'Y'     '9'     'y'     'Y'     '-'     '-'
+W               'Z'     '9'     'z'     'Z'     '-'     '-'
+
+COMMA           ','     ','     ','     '?'     '?'     ','
+PERIOD          '.'     '.'     '.'     '/'     '?'     0x2026
+AT              '@'     0x00    '@'     '~'     '~'     0x2022
+SLASH           '/'     '/'     '/'     '?'     '?'     '\'
+
+SPACE           0x20    0x20    0x20    0x20    0xEF01  0xEF01
+ENTER         0xa     0xa     0xa     0xa     0xa     0xa
+
+0               '0'     '0'     '0'     ')'     ')'     ')'
+1               '1'     '1'     '1'     '!'     '!'     '!'
+2               '2'     '2'     '2'     '@'     '@'     '@'
+3               '3'     '3'     '3'     '#'     '#'     '#'
+4               '4'     '4'     '4'     '$'     '$'     '$'
+5               '5'     '5'     '5'     '%'     '%'     '%'
+6               '6'     '6'     '6'     '^'     '^'     '^'
+7               '7'     '7'     '7'     '&'     '&'     '&'
+8               '8'     '8'     '8'     '*'     '*'     '*'
+9               '9'     '9'     '9'     '('     '('     '('
+
+
+# these are not actually on the Dream keypad... remove?
+TAB             0x9     0x9     0x9     0x9     0x9     0x9
+GRAVE           '`'     '`'     '`'     '~'     '`'     '~'
+MINUS           '-'     '-'     '-'     '_'     '-'     '_'
+EQUALS          '='     '='     '='     '+'     '='     '+'
+LEFT_BRACKET    '['     '['     '['     '{'     '['     '{'
+RIGHT_BRACKET   ']'     ']'     ']'     '}'     ']'     '}'
+BACKSLASH       '\'     '\'     '\'     '|'     '\'     '|'
+SEMICOLON       ';'     ';'     ';'     ':'     ';'     ':'
+APOSTROPHE      '''     '''     '''     '"'     '''     '"'
+STAR            '*'     '*'     '*'     '*'     '*'     '*'
+POUND           '#'     '#'     '#'     '#'     '#'     '#'
+PLUS            '+'     '+'     '+'     '+'     '+'     '+'
