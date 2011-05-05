@@ -13,6 +13,42 @@ on boot
 	#symlink /sbin/lsz /usr/bin/sz
 	#mkdir /data/test_results 01777 shell shell
 
+    ################ for LG compatibility
+    # LGE_BEGIN dilli.rao@lge.com 20-09-2010, from cupcake
+    # create LGDRM dirs if not exist
+    mkdir /data/lgdrm 0770 lgdrm lgdrm_acc
+    mkdir /data/lgdrm/cert 0770 lgdrm lgdrm_acc
+    mkdir /data/wmdrm 0770 lgdrm lgdrm_acc
+    mkdir /data/arcsofteved  0777 media arcdivx_acc
+    mkdir /data/arcsoftDivx 0770 lgdrm lgdrm_acc
+    chmod 0777 /dev/oncrpc/3000008e:fd348c74
+
+    # create 3rd_party dir if not exist
+    mkdir /data/local/tmp/3rd_party 0777
+    mkdir /data/local/tmp/3rd_party/ArcSoft 0777
+    mkdir /data/local/tmp/3rd_party/ArcSoft/MediaGallery 0777
+    mkdir /data/local/tmp/3rd_party/ArcSoft/MediaPlayer 0777
+    mkdir /data/local/tmp/3rd_party/ArcSoft/Camera 0777
+    #LGE_END dilli.rao@lge.com
+
+    # LGE_BEGIN dilli.rao@lge.com 20-09-2010
+    mkdir /data/arcsoft 0770 lgdrm lgdrm_acc
+    # LGE_END dilli.rao@lge.com 20-09-2010
+    # LGE_CHANGE_S, [jinwoonam@lge.com] 2009-08-05, <Add debugfs for test & test app>
+    mkdir /data/debug 0777 system system
+    mount debugfs mtd@debugfs /data/debug
+    # LGE_CHANGE_E, [jinwoonam@lge.com] 2009-08-05, <Add debugfs for test & test app>
+
+    # Mount the 3rd_party compressed filesystem 2011-02-03 wkpark
+    mount squashfs loop@/system/3rd_party/3rd_party.sqf /system/3rd_party/ ro
+
+    # LGE [dilli.rao@lge.com] 05-10-2010
+    # LGE [bluerti@lge.com] For Factory Reset
+    mkdir /data/nv
+    chmod 0777 /data/nv
+
+    ################
+
     mkdir /data/misc/wifi 0770 wifi wifi
 	mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp
@@ -39,6 +75,10 @@ on boot
 	chmod 0666 /dev/cam
 	chmod 0666 /data/misc/ts_cal
 	chmod 0666 /dev/bma150
+
+    # from LG
+	chmod 0666 /sys/class/backlight/adam-bl/brightness
+	chmod 0666 /sys/class/backlight/adam-bl/max_brightness
 	
     chmod 0666 /sys/class/rfkill/rfkill0/type
 	chmod 0666 /sys/class/rfkill/rfkill0/state
@@ -52,24 +92,39 @@ on boot
     write /proc/sys/net/ipv4/tcp_adv_win_scale  1
 
     #Somehow this is not handled by uevents
-    mkdir /dev/msm_camera
-	chown system camera /dev/msm_camera
-	exec /sbin/busybox mknod /dev/msm_camera/msm_camera0 c 247 0
-    chown system camera /dev/msm_camera/msm_camera0
-    chmod 0666 /dev/msm_camera/msm_camera0
+#   mkdir /dev/msm_camera
+#   chown system camera /dev/msm_camera
+#   exec /sbin/busybox mknod /dev/msm_camera/msm_camera0 c 247 0
+#   chown system camera /dev/msm_camera/msm_camera0
+#   chmod 0666 /dev/msm_camera/msm_camera0
 
     chmod 0666 /sys/devices/platform/android-keyled/setting
     chmod 0666 /sys/devices/platform/android-keyled/shift
     chmod 0666 /sys/devices/platform/android-keyled/enable
-        
+
+# LGE_CHANGE_S [princlee@lge.com] permission to handle in Application
+	chown system system /sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/enable
+	chmod 0666 /sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/enable
+
+
     chmod 0666 /sys/devices/platform/msm_hsusb_periphera/composition
 
 # LGE_CHANGE, [munyoung@lge.com] Disable fbcon cursor blink for fix BT sound break on sleep
 	write /sys/devices/virtual/graphics/fbcon/cursor_blink 0
-        
+
+    # has it interactive governor ?
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
+    # Make ondemand governor more responsive
+    chmod 0755 /sys/devices/system/cpu/cpu0/cpufreq/ondemand
     write /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate 20000
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 122880
+    write /sys/devices/system/cpu/cpu0/cpufreq/ondemand/up_threshold 80
+    chown radio system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chown radio system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    # min_freq less then 254MHz cause BT jittering
+    #write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 122880
+    #write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 528000
 
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
     chown bluetooth bluetooth /proc/bluetooth/sleep/proto
@@ -85,10 +140,11 @@ on boot
     chmod 0666 /dev/msm_snd
 
     #Enable sdcc polling -> fixes wifi hangs after resume
-    write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.1/polling 1
-    write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.2/polling 1
-    write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.3/polling 1
-    write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.4/polling 1
+    # crash with OpenEVE kernel-2.6.32.9
+    #write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.1/polling 1
+    #write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.2/polling 1
+    #write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.3/polling 1
+    #write /sys/bus/platform/drivers/msm_sdcc/msm_sdcc.4/polling 1
 
     # The compass device
     chown system system /dev/akm8973_daemon
@@ -97,16 +153,13 @@ on boot
     chmod 0666 /dev/akm8973_aot
 
     chmod 0666  /sys/module/pm/parameters/boot_complete
-    chown radio system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 528000
 
     #Checkgapps and choosesystem
     exec /sbin/busybox umount /system
     mount vfat /dev/block/mmcblk0p1 /sdcard dirsync nosuid nodev noexec uid=1000,gid=1015,fmask=0702,dmask=0702,shortname=mixed,utf8
     chown system system /sdcard
     chmod 0077 /sdcard
-    exec /sbin/logwrapper /sbin/sh /sbin/choosesystem
+    exec /sbin/logwrapper /sbin/busybox sh /sbin/choosesystem
     #If we do not boot from sdcard, try to unmount it, so it can be handled by vold
     exec /sbin/busybox umount /sdcard
 
@@ -138,6 +191,12 @@ on boot
     # 5.0 %
     write /dev/cpuctl/bg_non_interactive/cpu.shares 52
 
+    # SD card speed fix
+    write /sys/block/mmcblk0/bdi/read_ahead_kb 2048
+
+# USB internet sharing from cyanogen
+service dnsmasq /system/bin/logwrapper /system/bin/dnsmasq -d
+    disabled
 
 service wpa_supplicant /system/bin/wpa_supplicant -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
     socket wpa_wlan0 dgram 660 wifi wifi
@@ -147,6 +206,13 @@ service wpa_supplicant /system/bin/wpa_supplicant -Dwext -iwlan0 -c/data/misc/wi
 service dhcpcd /system/bin/dhcpcd -ABKL
 	disabled
 	oneshot
+
+# LGE btld
+service btld /system/bin/logwrapper /system/bin/btld -pf /system/bin/BCM4325D0_004.001.007.0168.0169.hcd -hb 4000000 -lpm 1
+    user root
+    group bluetooth net_bt_admin
+    disabled
+    oneshot
 
 service hciattach /system/bin/brcm_patchram_plus --enable_hci --baudrate 3000000 --patchram /system/bin/BCM4325D0_004.001.007.0168.0169.hcd /dev/ttyHS0
     user bluetooth
