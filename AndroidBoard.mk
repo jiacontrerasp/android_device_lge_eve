@@ -20,6 +20,11 @@ $(file) : $(LOCAL_PATH)/prebuilt/ueventd.eve.rc | $(ACP)
 	$(transform-prebuilt-to-target)
 ALL_PREBUILT += $(file)
 
+file := $(TARGET_ROOT_OUT)/sbin/pre-recovery.sh
+$(file) : $(LOCAL_PATH)/prebuilt/pre-recovery.sh | $(ACP)
+	$(transform-prebuilt-to-target)
+ALL_PREBUILT += $(file)
+
 $(call add-radio-file,recovery/images/firmware_install.565)
 $(call add-radio-file,recovery/images/firmware_error.565)
 $(call add-radio-file,recovery/images/bitmap_size.txt)

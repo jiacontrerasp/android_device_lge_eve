@@ -14,6 +14,7 @@ TARGET_NO_RECOVERY := false
 # recovery.img
 TARGET_PREBUILT_RECOVERY_KERNEL := device/lg/eve/kernel
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lg/eve/recovery/recovery_ui.c
+TARGET_RECOVERY_PRE_COMMAND := "sh /sbin/pre-recovery.sh; sync"
 
 # for OpenEVE kernel
 TARGET_OPENEVE := true
