@@ -50,7 +50,14 @@ on boot
     ################
 
     mkdir /data/misc/wifi 0770 wifi wifi
-	mkdir /data/misc/wifi/sockets 0770 wifi wifi
+    # cleanup exist sockets
+    exec /sbin/busybox rm -r /data/misc/wifi/sockets
+    mkdir /data/misc/wifi/sockets 0770 wifi wifi
+
+    # fix permission from root.shell to root.wifi
+    chown root wifi /data/misc/wifi/wpa_supplicant.conf
+    chmod 0770 /data/misc/wifi/wpa_supplicant.conf
+
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
 
@@ -195,6 +202,11 @@ service wpa_supplicant /system/bin/wpa_supplicant -Dwext -iwlan0 -c/data/misc/wi
 	oneshot
 
 service dhcpcd /system/bin/dhcpcd -ABKL
+	disabled
+	oneshot
+
+# for GB 2.3.4
+service dhcpcd_wlan0 /system/bin/dhcpcd -ABKL
 	disabled
 	oneshot
 
