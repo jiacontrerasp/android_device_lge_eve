@@ -138,15 +138,14 @@ AkmSensor::AkmSensor()
             if (!ioctl(data_fd, EVIOCGABS(EVENT_TYPE_PROXIMITY), &absinfo)) {
                 mPendingEvents[Proximity].distance = absinfo.value;
             }
+
+            mEnabled |= 1<<Brightness;
+            if (!ioctl(data_fd, EVIOCGABS(EVENT_TYPE_LIGHT), &absinfo)) {
+               mPendingEvents[Brightness].light = absinfo.value;
+            }
         }
     }
 #endif
-
-    mEnabled |= 1<<Temperature;
-    mEnabled |= 1<<Brightness;
-    if (!ioctl(data_fd, EVIOCGABS(EVENT_TYPE_LIGHT), &absinfo)) {
-        mPendingEvents[Brightness].light = absinfo.value;
-    }
 
     if (!mEnabled) {
         close_device();
