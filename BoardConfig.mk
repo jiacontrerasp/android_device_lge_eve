@@ -63,6 +63,9 @@ BOARD_KERNEL_CMDLINE := no_console_suspend=1 console=/dev/null
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
 
+# RIL
+TARGET_PROVIDES_LIBRIL := true
+
 # FM radio
 BOARD_HAVE_FM_RADIO := true
 BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
