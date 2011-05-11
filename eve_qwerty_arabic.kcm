@@ -1,0 +1,63 @@
+# @author Zozanyo - zozanyo@gmail.com
+# @date 2011/05/08 - Build 0101
+# @url http://code.google.com/p/openeve/issues/detail?id=3
+# @changelog
+#  * Correction for arabic letter "Jeem" on keycode "O"
+[type=QWERTY]
+
+# keycode      Display   Number    Base      Shift     Alt       Shift+Alt
+0              '0'       '0'       '0'       ')'       ')'       ')'
+1              '1'       '1'       '1'       '!'       '!'       '!'
+2              '2'       '2'       '2'       '@'       '@'       '@'
+3              '3'       '3'       '3'       '#'       '#'       '#'
+4              '4'       '4'       '4'       '$'       '$'       '$'
+5              '5'       '5'       '5'       '%'       '%'       '%'
+6              '6'       '6'       '6'       '^'       '^'       '^'
+7              '7'       '7'       '7'       '&'       '&'       '&'
+8              '8'       '8'       '8'       '*'       '*'       '*'
+9              '9'       '9'       '9'       '('       '('       '('
+STAR           '*'       '*'       '*'       '*'       '*'       '*'
+POUND          '#'       '#'       '#'       '#'       '#'       '#'
+A              'A'       '2'       'a'       'A'       0x003F    0x0634
+B              'B'       '2'       'b'       'B'       0x0622    0x0648
+C              'C'       '2'       'c'       'C'       '"'       0x0631
+D              'D'       '3'       'd'       'D'       0x003A    0x064A
+E              'E'       '3'       'e'       'E'       '+'       0x062B
+F              'F'       '3'       'f'       'F'       ';'       0x0628
+G              'G'       '4'       'g'       'G'       0xFEF7    0x0644
+H              'H'       '4'       'h'       'H'       0x0623    0x0627
+I              'I'       '4'       'i'       'I'       0x062E    0x062D
+J              'J'       '5'       'j'       'J'       '-'       0x062A
+K              'K'       '5'       'k'       'K'       0x060C    0x0646
+L              'L'       '5'       'l'       'L'       0x0621    0x0645
+M              'M'       '6'       'm'       'M'       0x061F    0x0643
+N              'N'       '6'       'n'       'N'       'N'       0x0632
+O              'O'       '6'       'o'       'O'       0x0625    0x062C
+P              'P'       '7'       'p'       'P'       0x0630    0x062F
+Q              'Q'       '7'       'q'       'Q'       0x9       0x0636
+R              'R'       '7'       'r'       'R'       '='       0x0642
+S              'S'       '7'       's'       'S'       '/'       0x0633
+T              'T'       '8'       't'       'T'       0xFEF9    0x0641
+U              'U'       '8'       'u'       'U'       0x0629    0x0647
+V              'V'       '8'       'v'       'V'       0xFEFB    0x0649
+W              'W'       '9'       'w'       'W'       '_'       0x0635
+X              'X'       '9'       'x'       'X'       '''       0x0624
+Y              'Y'       '9'       'y'       'Y'       0x063A    0x0639
+Z              'Z'       '9'       'z'       'Z'       ','       0x0626
+COMMA          ','       ','       ','       '?'       '?'       ','
+PERIOD         '.'       '.'       '.'       '\'       0x0638    0x0637 
+TAB            0x9       0x9       0x9       0x9       0x9       0x9
+SPACE          0x20      0x20      0x20      0x20      0xEF01    0xEF01
+ENTER          0xA       0xA       0xA       0xA       0xA       0xA
+GRAVE          '`'       '`'       '`'       '~'       '`'       '~'
+MINUS          '-'       '-'       '-'       '_'       '-'       '_'
+EQUALS         '='       '='       '='       '+'       '='       '+'
+LEFT_BRACKET   '['       '['       '['       '{'       '['       '{'
+RIGHT_BRACKET  ']'       ']'       ']'       '}'       ']'       '}'
+BACKSLASH      '\'       '\'       '\'       '|'       '\'       '|'
+SEMICOLON      ';'       ';'       ';'       ':'       ';'       ':'
+APOSTROPHE     '''       '''       '''       '"'       '''       '"'
+SLASH          '/'       '/'       '/'       '?'       '?'       '\'
+AT             '@'       0x0       '@'       '~'       '~'       0x2022
+PLUS           '+'       '+'       '+'       '+'       '+'       '+'
+
