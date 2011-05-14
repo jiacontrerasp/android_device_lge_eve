@@ -179,7 +179,7 @@ int AkmSensor::enable(int32_t handle, int en)
         if (!mEnabled) {
             open_device();
         }
-        int cmd;
+        int cmd = 0;
         switch (what) {
             case Accelerometer: cmd = ECS_IOCTL_APP_SET_AFLAG;  break;
             case MagneticField: cmd = ECS_IOCTL_APP_SET_MVFLAG; break;
@@ -190,12 +190,19 @@ int AkmSensor::enable(int32_t handle, int en)
 #endif
         }
         short flags = newState;
-        err = ioctl(dev_fd, cmd, &flags);
-        err = err<0 ? -errno : 0;
-        LOGE_IF(err, "ECS_IOCTL_APP_SET_XXX failed (%s)", strerror(-err));
+        if (cmd) {
+            err = ioctl(dev_fd, cmd, &flags);
+            err = err<0 ? -errno : 0;
+            LOGE_IF(err, "ECS_IOCTL_APP_SET_XXX failed (%s)", strerror(-err));
+        }
         if (!err) {
             mEnabled &= ~(1<<what);
             mEnabled |= (uint32_t(flags)<<what);
+
+            if (what == Proximity) {
+                mEnabled &= ~(1<<Brightness);
+                mEnabled |= (uint32_t(flags)<<Brightness);
+            }
             update_delay();
         }
         if (!mEnabled) {
