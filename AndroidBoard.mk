@@ -137,6 +137,10 @@ PRODUCT_COPY_FILES += \
 	device/lg/eve/prebuilt/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
 	device/lg/eve/prebuilt/gps.conf:system/etc/gps.conf
 
+# Input device calibration files
+PRODUCT_COPY_FILES += \
+	device/lg/eve/msm_touchscreen.idc:system/usr/idc/msm_touchscreen.idc
+
 PRODUCT_COPY_FILES += \
 	device/lg/eve/spn-conf.xml:system/etc/spn-conf.xml
 #Radio
