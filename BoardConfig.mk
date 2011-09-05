@@ -28,6 +28,9 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 #
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RECOVERY := false
+#
+BOARD_HAS_NO_MISC_PARTITION := true
+
 # recovery.img
 TARGET_PREBUILT_RECOVERY_KERNEL := device/lg/eve/kernel
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lg/eve/recovery/recovery_ui.c
@@ -109,7 +112,10 @@ BOARD_EGL_CFG := device/lg/eve/egl.cfg
 BOARD_USE_USB_MASS_STORAGE_SWITCH := true
 ifdef TARGET_OPENEVE
 # Add LUNFILE configuration to the system
-TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/msm_hsusb/gadget/lun"
+## for old CM7 src
+# TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/msm_hsusb/gadget/lun"
+#BOARD_USE_NO_USB_COMPOSITE := true
+BOARD_CUSTOM_USB_CONTROLLER := ../../device/lg/eve/UsbController.cpp
 endif
 
 # old libsensor
