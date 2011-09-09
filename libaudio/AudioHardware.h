@@ -77,6 +77,8 @@ struct msm_audio_config {
     uint32_t channel_count;
     uint32_t sample_rate;
     uint32_t codec_type;
+    uint32_t meta_field;
+    uint32_t bits;
     uint32_t unused[3];
 };
 
@@ -259,6 +261,7 @@ private:
             int SND_DEVICE_CURRENT;
             int SND_DEVICE_HANDSET;
             int SND_DEVICE_SPEAKER;
+            int SND_DEVICE_SPEAKER_MEDIA;
             int SND_DEVICE_HEADSET;
             int SND_DEVICE_BT;
             int SND_DEVICE_CARKIT;
@@ -268,6 +271,7 @@ private:
             int SND_DEVICE_NO_MIC_HEADSET;
             int SND_DEVICE_FM_HEADSET;
             int SND_DEVICE_HEADSET_AND_SPEAKER;
+            int SND_DEVICE_VOICE_RECORDER;
             int SND_DEVICE_FM_SPEAKER;
             int SND_DEVICE_BT_EC_OFF;
 };

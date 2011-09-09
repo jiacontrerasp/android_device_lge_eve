@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 #define LOG_TAG "AudioHardwareMSM72XX"
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -34,7 +34,7 @@
 #include "AudioHardware.h"
 #include <media/AudioRecord.h>
 
-#define LOG_SND_RPC 0  // Set to 1 to log sound RPC's
+#define LOG_SND_RPC 1  // Set to 1 to log sound RPC's
 
 namespace android {
 static int audpre_index, tx_iir_index;
@@ -50,6 +50,7 @@ AudioHardware::AudioHardware() :
     SND_DEVICE_CURRENT(-1),
     SND_DEVICE_HANDSET(-1),
     SND_DEVICE_SPEAKER(-1),
+    SND_DEVICE_SPEAKER_MEDIA(-1),
     SND_DEVICE_HEADSET(-1),
     SND_DEVICE_BT(-1),
     SND_DEVICE_CARKIT(-1),
@@ -59,58 +60,36 @@ AudioHardware::AudioHardware() :
     SND_DEVICE_NO_MIC_HEADSET(-1),
     SND_DEVICE_FM_HEADSET(-1),
     SND_DEVICE_HEADSET_AND_SPEAKER(-1),
+    SND_DEVICE_VOICE_RECORDER(-1),
     SND_DEVICE_FM_SPEAKER(-1),
     SND_DEVICE_BT_EC_OFF(-1)
 {
 
-    int (*snd_get_num)();
-    int (*snd_get_endpoint)(int, msm_snd_endpoint *);
-    int (*set_acoustic_parameters)();
-
     struct msm_snd_endpoint *ept;
 
-    acoustic = ::dlopen("/system/lib/libhtc_acoustic.so", RTLD_NOW);
-    if (acoustic == NULL ) {
-        LOGE("Could not open libhtc_acoustic.so");
-        /* this is not really an error on non-htc devices... */
+    int m7xsnddriverfd = open("/dev/msm_snd", O_RDWR);
+    if (m7xsnddriverfd < 0) {
+        LOGE("Could not open /dev/msm_snd");
         mNumSndEndpoints = 0;
         mInit = true;
         return;
     }
 
-    set_acoustic_parameters = (int (*)(void))::dlsym(acoustic, "set_acoustic_parameters");
-    if ((*set_acoustic_parameters) == 0 ) {
-        LOGE("Could not open set_acoustic_parameters()");
+    int rc = ioctl(m7xsnddriverfd, SND_GET_NUM_ENDPOINTS, &mNumSndEndpoints);
+    if (rc < 0 ) {
+        LOGE("Could not retrieve number of MSM SND endpoints.");
         return;
     }
 
-    int rc = set_acoustic_parameters();
-    if (rc < 0) {
-        LOGE("Could not set acoustic parameters to share memory: %d", rc);
-//        return;
-    }
-
-    snd_get_num = (int (*)(void))::dlsym(acoustic, "snd_get_num_endpoints");
-    if ((*snd_get_num) == 0 ) {
-        LOGE("Could not open snd_get_num()");
-//        return;
-    }
-
-    mNumSndEndpoints = snd_get_num();
     LOGD("mNumSndEndpoints = %d", mNumSndEndpoints);
     mSndEndpoints = new msm_snd_endpoint[mNumSndEndpoints];
     mInit = true;
-    LOGV("constructed %d SND endpoints)", mNumSndEndpoints);
+    LOGV("constructed (%d SND endpoints)", rc);
     ept = mSndEndpoints;
-    snd_get_endpoint = (int (*)(int, msm_snd_endpoint *))::dlsym(acoustic, "snd_get_endpoint");
-    if ((*snd_get_endpoint) == 0 ) {
-        LOGE("Could not open snd_get_endpoint()");
-        return;
-    }
-
     for (int cnt = 0; cnt < mNumSndEndpoints; cnt++, ept++) {
         ept->id = cnt;
-        snd_get_endpoint(cnt, ept);
+        ioctl(m7xsnddriverfd, SND_GET_ENDPOINT, ept);
+        LOGV("cnt = %d ept->name = %s ept->id = %d\n", cnt, ept->name, ept->id);
 #define CHECK_FOR(desc) \
         if (!strcmp(ept->name, #desc)) { \
             SND_DEVICE_##desc = ept->id; \
@@ -119,6 +98,7 @@ AudioHardware::AudioHardware() :
         CHECK_FOR(CURRENT)
         CHECK_FOR(HANDSET)
         CHECK_FOR(SPEAKER)
+        CHECK_FOR(SPEAKER_MEDIA)
         CHECK_FOR(BT)
         CHECK_FOR(BT_EC_OFF)
         CHECK_FOR(HEADSET)
@@ -128,10 +108,57 @@ AudioHardware::AudioHardware() :
         CHECK_FOR(TTY_HCO)
         CHECK_FOR(NO_MIC_HEADSET)
         CHECK_FOR(FM_HEADSET)
+        CHECK_FOR(VOICE_RECORDER)
         CHECK_FOR(FM_SPEAKER)
-        CHECK_FOR(HEADSET_AND_SPEAKER) {}
+        CHECK_FOR(HEADSET_AND_SPEAKER)
+        if (!strcmp(ept->name, "FM_RADIO_HEADSET_MEDIA")) {
+            SND_DEVICE_FM_HEADSET = ept->id;
+            LOGD("LG official kernel compatible FM radio");
+        }
 #undef CHECK_FOR
     }
+#if 0
+    int AUTO_VOLUME_ENABLED = 1; // setting enabled as default
+
+    static const char *const path = "/system/etc/AutoVolumeControl.txt";
+    int txtfd;
+    struct stat st;
+    char *read_buf;
+
+    txtfd = open(path, O_RDONLY);
+    if (txtfd < 0) {
+        LOGE("failed to open AUTO_VOLUME_CONTROL %s: %s (%d)",
+            path, strerror(errno), errno);
+    }
+    else {
+        if (fstat(txtfd, &st) < 0) {
+            LOGE("failed to stat %s: %s (%d)",
+                  path, strerror(errno), errno);
+            close(txtfd);
+        }
+
+        read_buf = (char *) mmap(0, st.st_size,
+                    PROT_READ | PROT_WRITE,
+                    MAP_PRIVATE,
+                    txtfd, 0);
+
+        if (read_buf == MAP_FAILED) {
+            LOGE("failed to mmap parameters file: %s (%d)",
+                  strerror(errno), errno);
+            close(txtfd);
+        }
+
+        if(read_buf[0] =='0')
+            AUTO_VOLUME_ENABLED = 0;
+
+        munmap(read_buf, st.st_size);
+        close(txtfd);
+    }
+
+    ioctl(m7xsnddriverfd, SND_AVC_CTL, &AUTO_VOLUME_ENABLED);
+    ioctl(m7xsnddriverfd, SND_AGC_CTL, &AUTO_VOLUME_ENABLED);
+#endif
+    close(m7xsnddriverfd);
 }
 
 AudioHardware::~AudioHardware()
@@ -236,6 +263,40 @@ void AudioHardware::closeInputStream(AudioStreamIn* in) {
     }
 }
 
+static int msm72xx_enable_audpp (uint16_t enable_mask)
+{
+    int fd;
+
+//    if (!audpp_filter_inited)
+//        return -1;
+
+    fd = open ("/dev/msm_pcm_ctl", O_RDWR);
+    if (fd < 0) {
+        LOGE ("Cannot open audio device");
+        return -1;
+    }
+
+    if (enable_mask & ADRC_ENABLE) {
+        enable_mask &= ~ADRC_ENABLE;
+    }
+    if (enable_mask & EQ_ENABLE) {
+        enable_mask &= ~EQ_ENABLE;
+    }
+    if (enable_mask & RX_IIR_ENABLE) {
+        enable_mask &= ~RX_IIR_ENABLE;
+    }
+
+    LOGI ("msm72xx_enable_audpp: 0x%04x", enable_mask);
+    if (ioctl (fd, AUDIO_ENABLE_AUDPP, &enable_mask) < 0) {
+       LOGE ("enable audpp error");
+       close (fd);
+       return -1;
+    }
+
+    close (fd);
+    return 0;
+}
+
 status_t AudioHardware::setMode(int mode)
 {
     status_t status = AudioHardwareBase::setMode(mode);
@@ -318,18 +379,6 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
             doRouting();
         }
     }
-
-#ifdef HAVE_FM_RADIO
-    key = String8(AudioParameter::keyFmOn);
-    int devices;
-    if (param.getInt(key, devices) == NO_ERROR) {
-       setFmOnOff(true);
-    }
-    key = String8(AudioParameter::keyFmOff);
-    if (param.getInt(key, devices) == NO_ERROR) {
-       setFmOnOff(false);
-    }
-#endif
 
     return NO_ERROR;
 }
@@ -433,12 +482,14 @@ status_t AudioHardware::setMasterVolume(float v)
     Mutex::Autolock lock(mLock);
     int vol = ceil(v * 5.0);
     LOGI("Set master volume to %d.\n", vol);
-    /*
+
     set_volume_rpc(SND_DEVICE_HANDSET, SND_METHOD_VOICE, vol);
     set_volume_rpc(SND_DEVICE_SPEAKER, SND_METHOD_VOICE, vol);
     set_volume_rpc(SND_DEVICE_BT,      SND_METHOD_VOICE, vol);
     set_volume_rpc(SND_DEVICE_HEADSET, SND_METHOD_VOICE, vol);
-    */
+    set_volume_rpc(SND_DEVICE_FM_HEADSET, SND_METHOD_VOICE, vol);
+    set_volume_rpc(SND_DEVICE_VOICE_RECORDER, SND_METHOD_VOICE, vol);
+
     // We return an error code here to let the audioflinger do in-software
     // volume on top of the maximum volume that we set through the SND API.
     // return error - software mixer will handle it
@@ -558,32 +609,44 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
         if (mBluetoothId) {
             device = mBluetoothId;
         } else if (!mBluetoothNrec) {
-            device = SND_DEVICE_BT_EC_OFF;
+            //device = SND_DEVICE_BT_EC_OFF;
+            device = SND_DEVICE_BT;
         }
     }
+
     LOGV("doAudioRouteOrMute() device %x, mMode %d, mMicMute %d", device, mMode, mMicMute);
+
+    /**
+     * mMode == AudioSystem::MODE_IN_CALL ? mMicMute : false
+     * is a workaround for a bug on the eve (see issue openetna 134).
+     * Whenever we leave IN_CALL mode, we have to turn the 'microphone' mute.
+     * This does not effect audio recording!
+     * Leaving micMute to false will produce white noise after another sound is played.
+     */
+
     return do_route_audio_rpc(device,
-                              mMode != AudioSystem::MODE_IN_CALL, mMicMute);
+                              mMode != AudioSystem::MODE_IN_CALL, (mMode == AudioSystem::MODE_IN_CALL) ? mMicMute : true);
 }
 
 status_t AudioHardware::doRouting()
 {
-    /* currently this code doesn't work without the htc libacoustic */
-    if (!acoustic)
-        return 0;
-
     Mutex::Autolock lock(mLock);
     uint32_t outputDevices = mOutput->devices();
     status_t ret = NO_ERROR;
-    int (*msm72xx_enable_audpp)(int);
-    msm72xx_enable_audpp = (int (*)(int))::dlsym(acoustic, "msm72xx_enable_audpp");
     int audProcess = (ADRC_DISABLE | EQ_DISABLE | RX_IIR_DISABLE);
     AudioStreamInMSM72xx *input = getActiveInput_l();
     uint32_t inputDevice = (input == NULL) ? 0 : input->devices();
     int sndDevice = -1;
 
+    LOGV("AudioHardware::doRouting output device %x, fm = %d", outputDevices, mFmRadioEnabled);
+
     if (inputDevice != 0) {
         LOGI("do input routing device %x\n", inputDevice);
+        // ignore routing device information when we start a recording in voice
+        // call
+        // Recording will happen through currently active tx device
+        if(inputDevice == AudioSystem::DEVICE_IN_VOICE_CALL)
+            return NO_ERROR;
         if (inputDevice & AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET) {
             LOGI("Routing audio to Bluetooth PCM\n");
             sndDevice = SND_DEVICE_BT;
@@ -597,10 +660,13 @@ status_t AudioHardware::doRouting()
                 LOGI("Routing audio to Wired Headset\n");
                 sndDevice = SND_DEVICE_HEADSET;
             }
+        } else if (inputDevice & AudioSystem::DEVICE_IN_BUILTIN_MIC) {
+            LOGI("Routing audio to Builtin MIC\n");
+            sndDevice = SND_DEVICE_SPEAKER;
         } else {
             if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
-                LOGI("Routing audio to Speakerphone\n");
-                sndDevice = SND_DEVICE_SPEAKER;
+                LOGI("Routing audio to VoiceRecorder\n");
+                sndDevice = SND_DEVICE_VOICE_RECORDER;
                 audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE);
             } else {
                 LOGI("Routing audio to Handset\n");
@@ -611,6 +677,7 @@ status_t AudioHardware::doRouting()
     // if inputDevice == 0, restore output routing
 
     if (sndDevice == -1) {
+        LOGI("do output routing device %x\n", outputDevices);
         if (outputDevices & (outputDevices - 1)) {
             if ((outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) == 0) {
                 LOGW("Hardware does not support requested route combination (%#X),"
@@ -619,17 +686,25 @@ status_t AudioHardware::doRouting()
         }
 
         if (outputDevices &
-            (AudioSystem::DEVICE_OUT_BLUETOOTH_SCO | AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET)) {
-            LOGI("Routing audio to Bluetooth PCM\n");
-            sndDevice = SND_DEVICE_BT;
-        } else if (outputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT) {
-            LOGI("Routing audio to Bluetooth PCM\n");
-            sndDevice = SND_DEVICE_CARKIT;
+            (AudioSystem::DEVICE_OUT_BLUETOOTH_SCO | AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET
+                | AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT)) {
+            if (mFmRadioEnabled) {
+                LOGI("Routing FM audio to Wired Headset\n");
+                sndDevice = SND_DEVICE_FM_HEADSET;
+            } else {
+                LOGI("Routing audio to Bluetooth PCM\n");
+                sndDevice = SND_DEVICE_BT;
+            }
         } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) &&
                    (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER)) {
-            LOGI("Routing audio to Wired Headset and Speaker\n");
-            sndDevice = SND_DEVICE_HEADSET_AND_SPEAKER;
-            audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE);
+            if (mFmRadioEnabled) {
+                LOGI("Routing FM audio to Wired Headset\n");
+                sndDevice = SND_DEVICE_FM_HEADSET;
+            } else {
+                LOGI("Routing audio to Wired Headset and Speaker\n");
+                sndDevice = SND_DEVICE_HEADSET_AND_SPEAKER;
+                audProcess = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE);
+            }
         } else if (outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) {
             if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
                 LOGI("Routing audio to No microphone Wired Headset and Speaker (%d,%x)\n", mMode, outputDevices);
@@ -669,11 +744,7 @@ status_t AudioHardware::doRouting()
 
     if (sndDevice != -1 && sndDevice != mCurSndDevice) {
         ret = doAudioRouteOrMute(sndDevice);
-        if ((*msm72xx_enable_audpp) == 0 ) {
-            LOGE("Could not open msm72xx_enable_audpp()");
-        } else {
-            msm72xx_enable_audpp(audProcess);
-        }
+        msm72xx_enable_audpp(audProcess);
         mCurSndDevice = sndDevice;
     }
 
@@ -763,6 +834,7 @@ status_t AudioHardware::AudioStreamOutMSM72xx::set(
     uint32_t lRate = pRate ? *pRate : 0;
 
     mHardware = hw;
+    LOGV("AudioStreamOutMSM72xx::set(device=%d, %d, %d, %u)", devices, *pFormat, *pChannels, *pRate);
 
     // fix up defaults
     if (lFormat == 0) lFormat = format();
@@ -933,6 +1005,30 @@ status_t AudioHardware::AudioStreamOutMSM72xx::setParameters(const String8& keyV
         status = mHardware->doRouting();
         param.remove(key);
     }
+
+#ifdef HAVE_FM_RADIO
+    key = String8(AudioParameter::keyFmOn);
+    int devices;
+    if (param.getInt(key, devices) == NO_ERROR) {
+       mDevices = devices;
+       mHardware->setFmOnOff(true);
+    }
+    key = String8(AudioParameter::keyFmOff);
+    if (param.getInt(key, devices) == NO_ERROR && devices) {
+
+       // workaround XXX
+       if (devices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET)
+          mDevices = AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+       else if (devices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO)
+          mDevices = AudioSystem::DEVICE_OUT_BLUETOOTH_SCO;
+       else if (devices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT)
+          mDevices = AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+       else if (devices & AudioSystem::DEVICE_OUT_WIRED_HEADSET)
+          mDevices = AudioSystem::DEVICE_OUT_WIRED_HEADSET;
+
+       mHardware->setFmOnOff(false);
+    }
+#endif
 
     if (param.size()) {
         status = BAD_VALUE;

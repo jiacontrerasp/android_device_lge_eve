@@ -25,6 +25,7 @@ PRODUCT_PACKAGES += \
     sensors.eve \
     lights.eve \
     gps.eve \
+    libaudio \
     rzscontrol \
     copybit.msm7k \
     gralloc.msm7k

@@ -65,6 +65,7 @@ BOARD_WLAN_DEVICE           := bcm4329
 WIFI_DRIVER_FW_STA_PATH     := "/system/etc/wl/rtecdc.bin"
 WIFI_DRIVER_FW_AP_PATH      := "/system/etc/wl/rtecdc-apsta.bin"
 
+TARGET_PROVIDES_LIBAUDIO := true
 BOARD_USES_GENERIC_AUDIO := false
 BOARD_USE_HTC_LIBSENSORS := false
 

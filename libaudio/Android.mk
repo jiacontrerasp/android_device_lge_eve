@@ -1,4 +1,5 @@
 
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),eve)
 ifneq ($(BUILD_TINY_ANDROID),true)
 
 LOCAL_PATH := $(call my-dir)
@@ -15,6 +16,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := libaudiopolicybase
 
+LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE:= libaudiopolicy
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
@@ -23,9 +25,12 @@ endif
 
 include $(BUILD_SHARED_LIBRARY)
 
+#LOCAL_PATH := hardware/msm7k/libaudio
 
 include $(CLEAR_VARS)
 
+LOCAL_PRELINK_MODULE := false
+LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libaudio
 
 LOCAL_SHARED_LIBRARIES := \
@@ -67,4 +72,5 @@ endif
 include $(BUILD_SHARED_LIBRARY)
 
 endif # not BUILD_TINY_ANDROID
+endif # eve check
 
