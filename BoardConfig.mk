@@ -32,8 +32,8 @@ TARGET_NO_RECOVERY := false
 BOARD_HAS_NO_MISC_PARTITION := true
 
 # recovery.img
-TARGET_PREBUILT_RECOVERY_KERNEL := device/lg/eve/kernel
-BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lg/eve/recovery/recovery_ui.c
+TARGET_PREBUILT_RECOVERY_KERNEL := device/lge/eve/kernel
+BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lge/eve/recovery/recovery_ui.c
 TARGET_RECOVERY_PRE_COMMAND := "sh /sbin/pre-recovery.sh; sync"
 
 # for OpenEVE kernel
@@ -107,7 +107,7 @@ BOARD_USES_GPSSHIM := true
 #USE_PV_WINDOWS_MEDIA := false
 USE_CAMERA_STUB := false
 
-BOARD_EGL_CFG := device/lg/eve/egl.cfg
+BOARD_EGL_CFG := device/lge/eve/egl.cfg
 
 # USB
 BOARD_USE_USB_MASS_STORAGE_SWITCH := true
@@ -116,7 +116,7 @@ ifdef TARGET_OPENEVE
 ## for old CM7 src
 # TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/msm_hsusb/gadget/lun"
 #BOARD_USE_NO_USB_COMPOSITE := true
-BOARD_CUSTOM_USB_CONTROLLER := ../../device/lg/eve/UsbController.cpp
+BOARD_CUSTOM_USB_CONTROLLER := ../../device/lge/eve/UsbController.cpp
 endif
 
 # old libsensor

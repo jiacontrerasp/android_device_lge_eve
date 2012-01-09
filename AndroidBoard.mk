@@ -70,7 +70,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libmm-adspsvc.so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
-LOCAL_SRC_FILES := proprietary/$(LOCAL_MODULE)
+LOCAL_SRC_FILES := ../../../vendor/lge/eve/proprietary/$(LOCAL_MODULE)
 OVERRIDE_BUILT_MODULE_PATH := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)
 LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
@@ -79,7 +79,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libcommondefs.so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
-LOCAL_SRC_FILES := proprietary/$(LOCAL_MODULE)
+LOCAL_SRC_FILES := ../../../vendor/lge/eve/proprietary/$(LOCAL_MODULE)
 OVERRIDE_BUILT_MODULE_PATH := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)
 LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
@@ -88,7 +88,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libloc-rpc.so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
-LOCAL_SRC_FILES := proprietary/$(LOCAL_MODULE) $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/libcommondefs.so
+LOCAL_SRC_FILES := ../../../vendor/lge/eve/proprietary/$(LOCAL_MODULE) $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/libcommondefs.so
 OVERRIDE_BUILT_MODULE_PATH := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)
 LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
@@ -98,7 +98,7 @@ LOCAL_MODULE := libloc.so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
 #Only the first file is copied, the other are deps
-LOCAL_SRC_FILES := proprietary/$(LOCAL_MODULE) $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/libloc-rpc.so
+LOCAL_SRC_FILES := ../../../vendor/lge/eve/proprietary/$(LOCAL_MODULE) $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/libloc-rpc.so
 OVERRIDE_BUILT_MODULE_PATH := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)
 LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
@@ -108,7 +108,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libcamera.so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
-LOCAL_SRC_FILES := proprietary/$(LOCAL_MODULE)
+LOCAL_SRC_FILES := ../../../vendor/lge/eve/proprietary/$(LOCAL_MODULE)
 OVERRIDE_BUILT_MODULE_PATH := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)
 LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
@@ -118,7 +118,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libril.so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
-LOCAL_SRC_FILES := proprietary/$(LOCAL_MODULE) $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/libhardware_legacy.so
+LOCAL_SRC_FILES := ../../../vendor/lge/eve/proprietary/$(LOCAL_MODULE) $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/libhardware_legacy.so
 OVERRIDE_BUILT_MODULE_PATH := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)
 LOCAL_MODULE_TAGS := eng
 include $(BUILD_PREBUILT)
@@ -134,20 +134,20 @@ PRODUCT_COPY_FILES += \
 	frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
 	frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
 	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:/system/etc/permissions/android.software.live_wallpaper.xml \
-	device/lg/eve/prebuilt/15checkgapps:system/etc/init.d/15checkgapps \
-	device/lg/eve/prebuilt/eve_qwerty.kl:system/usr/keylayout/eve_qwerty.kl \
-	device/lg/eve/prebuilt/7k_handset.kl:system/usr/keylayout/7k_handset.kl \
-	device/lg/eve/prebuilt/qwerty.kl:system/usr/keylayout/qwerty.kl \
-	device/lg/eve/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-	device/lg/eve/prebuilt/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
-	device/lg/eve/prebuilt/gps.conf:system/etc/gps.conf
+	device/lge/eve/prebuilt/15checkgapps:system/etc/init.d/15checkgapps \
+	device/lge/eve/prebuilt/eve_qwerty.kl:system/usr/keylayout/eve_qwerty.kl \
+	device/lge/eve/prebuilt/7k_handset.kl:system/usr/keylayout/7k_handset.kl \
+	device/lge/eve/prebuilt/qwerty.kl:system/usr/keylayout/qwerty.kl \
+	device/lge/eve/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+	device/lge/eve/prebuilt/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
+	device/lge/eve/prebuilt/gps.conf:system/etc/gps.conf
 
 # Input device calibration files
 PRODUCT_COPY_FILES += \
-	device/lg/eve/msm_touchscreen.idc:system/usr/idc/msm_touchscreen.idc
+	device/lge/eve/msm_touchscreen.idc:system/usr/idc/msm_touchscreen.idc
 
 PRODUCT_COPY_FILES += \
-	device/lg/eve/spn-conf.xml:system/etc/spn-conf.xml
+	device/lge/eve/spn-conf.xml:system/etc/spn-conf.xml
 #Radio
 PROPRIETARY := lib/liblgdrmwbxml.so lib/liblgdrmxyssl.so lib/libdll.so \
 	lib/libril-qcril-hook-oem.so lib/libgsdi_exp.so lib/libgstk_exp.so lib/libwms.so \
@@ -203,4 +203,4 @@ PROPRIETARY += lib/libmm-qcamera-tgt.so lib/libmmjpeg.so
 #GPS
 PROPRIETARY += lib/libloc_api.so lib/libloc_ext.so lib/libgps.so
 
-PRODUCT_COPY_FILES += $(foreach i,$(PROPRIETARY),$(LOCAL_PATH)/proprietary/$(notdir $i):system/$i)
+PRODUCT_COPY_FILES += $(foreach i,$(PROPRIETARY),vendor/lge/eve/proprietary/$(notdir $i):system/$i)

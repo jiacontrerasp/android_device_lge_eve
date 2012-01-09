@@ -16,7 +16,7 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 
 
-DEVICE_PACKAGE_OVERLAYS := device/lg/eve/overlay
+DEVICE_PACKAGE_OVERLAYS := device/lge/eve/overlay
 
 # Packages
 PRODUCT_PACKAGES += \
@@ -33,6 +33,11 @@ PRODUCT_PACKAGES += \
 # not work
 #    libOmxCore \
 #    libmm-omxcore
+ifeq ($(TARGET_PREBUILT_KERNEL),)
+	LOCAL_KERNEL := device/lge/eve/kernel
+else
+	LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
+endif
 
 # Install the features available on this device.
 PRODUCT_COPY_FILES += \
@@ -81,7 +86,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # media configuration xml file
 PRODUCT_COPY_FILES += \
-    device/lg/eve/media_profiles.xml:/system/etc/media_profiles.xml
+    device/lge/eve/media_profiles.xml:/system/etc/media_profiles.xml
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_KERNEL):kernel
