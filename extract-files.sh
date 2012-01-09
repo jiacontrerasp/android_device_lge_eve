@@ -1,7 +1,21 @@
 #!/bin/bash
 
-rm -Rf proprietary
-mkdir -p proprietary
+VENDOR=lge
+DEVICE=eve
+
+DEST=../../../vendor/$VENDOR/$DEVICE
+rm -rf $DEST/proprietary
+mkdir -p $DEST/proprietary
+
+if [ ! -f $DEST/system/build.prop ]; then
+  ADB=adb
+  PULL=pull
+  SRC=
+else
+  ADB=cp
+  PULL=
+  SRC=$DEST/system
+fi
 
 #Radio
 FILES="lib/liblgdrmwbxml.so lib/liblgdrmxyssl.so lib/libdll.so lib/libril-qcril-hook-oem.so lib/libgsdi_exp.so lib/libgstk_exp.so lib/libwms.so"
@@ -38,20 +52,9 @@ FILES="$FILES lib/egl/libGLES_qcom.so"
 #GPS
 FILES="$FILES lib/libloc.so lib/libloc-rpc.so lib/libcommondefs.so lib/libloc_api.so lib/libloc_ext.so lib/libgps.so"
 
-SRC="../../../../lg2.2/system"
-
-if [[ ! -e $SRC ]]; then
-  echo "ERROR: Could not find $SRC"
-  exit 1
-fi
-
-for i in $FILES
-do
-  #if [[ -e $SRC ]]; then
-    cp -a "$SRC/$i" proprietary/ || exit 1
-  #else
-  #  adb pull /system/$i proprietary/ || exit 1
-  #fi
+for i in $FILES; do
+  $ADB $PULL "$SRC/system/$i" $DEST/proprietary || exit 1
 done
 
-chmod 755 proprietary/akmd2
+chmod 755 $DEST/proprietary/akmd2
+echo "NOTE: Unless all transfers failed, errors above should be safe to ignore. Proceed with your build"
