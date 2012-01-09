@@ -35,9 +35,10 @@ on boot
     mkdir /data/arcsoft 0770 lgdrm lgdrm_acc
     # LGE_END dilli.rao@lge.com 20-09-2010
     # LGE_CHANGE_S, [jinwoonam@lge.com] 2009-08-05, <Add debugfs for test & test app>
-    mkdir /data/debug 0777 system system
-    mount debugfs mtd@debugfs /data/debug
+    #mkdir /data/debug 0777 system system
+    #mount debugfs mtd@debugfs /data/debug
     # LGE_CHANGE_E, [jinwoonam@lge.com] 2009-08-05, <Add debugfs for test & test app>
+    mount debugfs /sys/kernel/debug /sys/kernel/debug
 
     # Mount the 3rd_party compressed filesystem 2011-02-03 wkpark
     mount squashfs loop@/system/3rd_party/3rd_party.sqf /system/3rd_party/ ro
@@ -155,13 +156,13 @@ on boot
     chmod 0666  /sys/module/pm/parameters/boot_complete
 
     #Checkgapps and choosesystem
-    exec /sbin/busybox umount /system
-    mount vfat /dev/block/mmcblk0p1 /sdcard dirsync nosuid nodev noexec uid=1000,gid=1015,fmask=0702,dmask=0702,shortname=mixed,utf8
-    chown system system /sdcard
-    chmod 0077 /sdcard
-    exec /sbin/logwrapper /sbin/busybox sh /sbin/choosesystem
+    #exec /sbin/busybox umount /system
+    #mount vfat /dev/block/mmcblk0p1 /mnt/sdcard dirsync nosuid nodev noexec uid=1000,gid=1015,fmask=0702,dmask=0702,shortname=mixed,utf8
+    #chown system system /sdcard
+    #chmod 0077 /sdcard
+    #exec /sbin/logwrapper /sbin/busybox sh /sbin/choosesystem
     #If we do not boot from sdcard, try to unmount it, so it can be handled by vold
-    exec /sbin/busybox umount /sdcard
+    #exec /sbin/busybox umount /sdcard
 
     # Create cgroup mount points for process groups
     mkdir /dev/cpuctl
