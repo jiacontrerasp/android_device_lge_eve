@@ -2,6 +2,7 @@
 #because there is no way to escape the space
 rild.libargs=-d /dev/smd0
 # from LG froyo
+#gsm.version.baseband=AMSS6385
 persist.rild.nitz_plmn=
 persist.rild.nitz_long_ons_0=
 persist.rild.nitz_long_ons_1=
@@ -13,4 +14,7 @@ persist.rild.nitz_short_ons_2=
 persist.rild.nitz_short_ons_3=
 DEVICE_PROVISIONED=1
 use_csp_plmn=0
-
+# etc
+persist.sys.use_dithering=0
+# CM7.1.0 release
+persist.sys.use_16bpp_alpha=1
