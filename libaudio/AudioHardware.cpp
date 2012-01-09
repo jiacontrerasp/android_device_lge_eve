@@ -267,6 +267,7 @@ static int msm72xx_enable_audpp (uint16_t enable_mask)
 {
     int fd;
 
+    return -EINVAL; // XXX disabled
 //    if (!audpp_filter_inited)
 //        return -1;
 
@@ -605,6 +606,7 @@ static status_t do_route_audio_rpc(uint32_t device,
 // always call with mutex held
 status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
 {
+#if 0
     if (device == (uint32_t)SND_DEVICE_BT || device == (uint32_t)SND_DEVICE_CARKIT) {
         if (mBluetoothId) {
             device = mBluetoothId;
@@ -613,6 +615,7 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
             device = SND_DEVICE_BT;
         }
     }
+#endif
 
     LOGV("doAudioRouteOrMute() device %x, mMode %d, mMicMute %d", device, mMode, mMicMute);
 
